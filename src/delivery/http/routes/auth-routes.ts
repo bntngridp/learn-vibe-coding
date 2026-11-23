@@ -9,9 +9,11 @@ export interface AuthRoutesDeps {
   readonly tokenService: ITokenService;
 }
 
+/** Mendaftarkan seluruh endpoint autentikasi (/api/v1/auth/register, /login, dan /me). */
 export function createAuthRoutes({ authUseCase, tokenService }: AuthRoutesDeps) {
   const authMiddleware = createAuthMiddleware(tokenService);
 
+  // Endpoint terproteksi JWT untuk mengambil profil pengguna yang sedang login
   const protectedAuthRoutes = new Elysia()
     .use(authMiddleware)
     .get("/me", async ({ authUser }) => {
@@ -22,6 +24,7 @@ export function createAuthRoutes({ authUseCase, tokenService }: AuthRoutesDeps) 
     });
 
   return new Elysia({ prefix: "/api/v1/auth" })
+    // Endpoint publik untuk mendaftarkan akun pengguna baru
     .post(
       "/register",
       async ({ body, set }) => {
@@ -41,6 +44,7 @@ export function createAuthRoutes({ authUseCase, tokenService }: AuthRoutesDeps) 
         }),
       }
     )
+    // Endpoint publik untuk login menggunakan email dan password
     .post(
       "/login",
       async ({ body, set }) => {

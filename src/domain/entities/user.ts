@@ -19,6 +19,7 @@ export interface PublicUser {
   readonly updatedAt: string;
 }
 
+/** Mengonversi entitas User menjadi data publik yang aman dikirim ke client (tanpa passwordHash). */
 export function toPublicUser(user: User): PublicUser {
   return {
     id: user.id,

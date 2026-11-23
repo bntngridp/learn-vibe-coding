@@ -5,6 +5,7 @@ import type {
   ITokenService,
 } from "../../../domain/ports/token-service";
 
+/** Middleware autentikasi yang mengekstrak Bearer token, memverifikasi JWT, dan menyuntikkan authUser ke context. */
 export function createAuthMiddleware(tokenService: ITokenService) {
   return new Elysia({ name: "auth-middleware" }).derive(
     { as: "scoped" },

@@ -16,10 +16,12 @@ interface MysqlErrorLike {
   readonly cause?: unknown;
 }
 
+/** Type guard untuk memastikan nilai bertipe object non-null sebelum membaca propertinya. */
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+/** Mendeteksi error duplikasi unique constraint MySQL (ER_DUP_ENTRY / errno 1062), termasuk yang dibungkus Drizzle. */
 function isDuplicateEntryError(error: unknown): boolean {
   if (!isObjectRecord(error)) {
     return false;
@@ -37,10 +39,12 @@ function isDuplicateEntryError(error: unknown): boolean {
   return false;
 }
 
+/** Menormalisasi nilai kolom role dari database menjadi tipe UserRole yang valid. */
 function toUserRole(role: string): UserRole {
   return role === "admin" ? "admin" : "user";
 }
 
+/** Memetakan baris hasil query tabel users menjadi entitas domain User. */
 function mapRowToDomain(row: UserRow): User {
   return {
     id: row.id,
@@ -56,6 +60,7 @@ function mapRowToDomain(row: UserRow): User {
 export class DrizzleUserRepository implements IUserRepository {
   constructor(private readonly db: Database) {}
 
+  /** Mencari satu user berdasarkan alamat email; mengembalikan null jika tidak ditemukan. */
   async findByEmail(email: string): Promise<User | null> {
     const rows = await this.db
       .select()
@@ -67,6 +72,7 @@ export class DrizzleUserRepository implements IUserRepository {
     return row ? mapRowToDomain(row) : null;
   }
 
+  /** Mencari satu user berdasarkan primary key id; mengembalikan null jika tidak ditemukan. */
   async findById(id: number): Promise<User | null> {
     const rows = await this.db
       .select()
@@ -78,6 +84,7 @@ export class DrizzleUserRepository implements IUserRepository {
     return row ? mapRowToDomain(row) : null;
   }
 
+  /** Menyimpan record user baru ke MySQL dan melempar ConflictError jika email sudah terdaftar. */
   async create(input: CreateUserInput): Promise<User> {
     try {
       const [result] = await this.db.insert(users).values({
@@ -105,6 +112,7 @@ export class DrizzleUserRepository implements IUserRepository {
     }
   }
 
+  /** Mengambil daftar user secara terpaginasi beserta total data keseluruhan. */
   async findPaginated(params: PaginationParams): Promise<PaginatedResult<User>> {
     const offset = (params.page - 1) * params.perPage;
 

@@ -43,6 +43,7 @@ export class AuthUseCase {
     private readonly tokenService: ITokenService
   ) {}
 
+  /** Memvalidasi input, memeriksa duplikasi email, meng-hash password, menyimpan user baru, dan menerbitkan JWT. */
   async register(input: RegisterInput): Promise<AuthResult> {
     const name = input.name.trim();
     const email = input.email.trim().toLowerCase();
@@ -116,6 +117,7 @@ export class AuthUseCase {
     };
   }
 
+  /** Memverifikasi kredensial email dan password pengguna lalu mengembalikan data user beserta JWT. */
   async login(input: LoginInput): Promise<AuthResult> {
     const email = input.email.trim().toLowerCase();
     const password = input.password;
@@ -170,6 +172,7 @@ export class AuthUseCase {
     };
   }
 
+  /** Mengambil data profil publik pengguna yang sedang login berdasarkan userId dari token JWT. */
   async getCurrentUser(userId: number): Promise<PublicUser> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
@@ -179,6 +182,7 @@ export class AuthUseCase {
     return toPublicUser(user);
   }
 
+  /** Menghasilkan hash dummy (di-cache sekali) agar durasi verifikasi saat email tidak ditemukan tetap konsisten. */
   private getDummyPasswordHash(): Promise<string> {
     if (!this.dummyPasswordHashPromise) {
       this.dummyPasswordHashPromise = this.passwordHasher.hash(

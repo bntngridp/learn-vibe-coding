@@ -13,6 +13,7 @@ export interface JwtTokenServiceConfig {
   readonly issuer: string;
 }
 
+/** Memastikan nilai role dari payload token sesuai dengan daftar UserRole yang valid. */
 function isUserRole(value: unknown): value is UserRole {
   return value === "user" || value === "admin";
 }
@@ -28,6 +29,7 @@ export class JwtTokenService implements ITokenService {
     this.issuer = config.issuer;
   }
 
+  /** Membuat dan menandatangani access token JWT (HS256) berisi identitas dan role pengguna. */
   async signAccessToken(payload: AuthTokenPayload): Promise<SignedTokenResult> {
     const accessToken = await new SignJWT({
       email: payload.email,
@@ -47,6 +49,7 @@ export class JwtTokenService implements ITokenService {
     };
   }
 
+  /** Memverifikasi signature, issuer, masa berlaku, dan struktur payload access token JWT. */
   async verifyAccessToken(token: string): Promise<AuthTokenPayload> {
     try {
       const { payload } = await jwtVerify(token, this.secretKey, {
