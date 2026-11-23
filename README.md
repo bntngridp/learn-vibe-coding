@@ -17,7 +17,7 @@ src/
 ├── infrastructure/
 │   ├── database/                         # MySQL pool & Drizzle schema
 │   ├── repositories/                     # Drizzle repository implementations
-│   └── security/                         # Argon2id password hasher & HS256 JWT service
+│   └── security/                         # bcrypt password hasher & HS256 JWT service
 ├── usecases/                             # Business logic & semantic validation
 └── delivery/http/                        # Thin routes, middlewares, response envelopes
 ```

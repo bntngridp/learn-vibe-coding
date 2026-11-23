@@ -85,7 +85,7 @@ describe("Auth API Integration (DBngin MySQL)", () => {
 
     expect(storedUser).toBeDefined();
     expect(storedUser?.passwordHash).not.toBe("SecurePassword123");
-    expect(storedUser?.passwordHash.startsWith("$argon2id$")).toBe(true);
+    expect(/^\$2[aby]\$/.test(storedUser?.passwordHash ?? "")).toBe(true);
 
     const duplicateRes = await app.handle(
       new Request("http://localhost/api/v1/auth/register", {

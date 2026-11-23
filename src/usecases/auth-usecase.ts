@@ -32,7 +32,7 @@ const MIN_NAME_LENGTH = 2;
 const MAX_NAME_LENGTH = 120;
 const MAX_EMAIL_LENGTH = 255;
 const MIN_PASSWORD_LENGTH = 8;
-const MAX_PASSWORD_LENGTH = 128;
+const MAX_PASSWORD_BYTES = 72;
 
 export class AuthUseCase {
   private dummyPasswordHashPromise: Promise<string> | null = null;
@@ -68,13 +68,15 @@ export class AuthUseCase {
       });
     }
 
+    const passwordByteLength = new TextEncoder().encode(password).length;
+
     if (
       password.length < MIN_PASSWORD_LENGTH ||
-      password.length > MAX_PASSWORD_LENGTH
+      passwordByteLength > MAX_PASSWORD_BYTES
     ) {
       errors.push({
         field: "password",
-        message: `Password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters`,
+        message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters and at most ${MAX_PASSWORD_BYTES} bytes`,
       });
     } else if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
       errors.push({
