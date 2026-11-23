@@ -34,6 +34,9 @@ const app = createApp({
 console.log(
   `Elysia server is running at http://${app.server?.hostname}:${app.server?.port}`
 );
+console.log(
+  `Swagger UI is available at http://${app.server?.hostname}:${app.server?.port}/swagger`
+);
 
 async function shutdown(signal: string): Promise<void> {
   console.log(`Received ${signal}, shutting down gracefully...`);

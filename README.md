@@ -15,6 +15,8 @@ Project ini menerapkan **Clean Architecture** dengan pemisahan tanggung jawab an
   - Daftar pengguna terpaginasi (`GET /api/v1/users?page=1&per_page=10`) yang dilindungi middleware autentikasi Bearer JWT.
 - **Health Check (`/health`)**:
   - Pemeriksaan status server serta konektivitas aktif ke database MySQL.
+- **Dokumentasi API Interaktif (`/swagger` & `/swagger/json`)**:
+  - Swagger UI berbasis `@elysiajs/swagger` (OpenAPI 3.0.3) lengkap dengan tombol **Authorize** (Bearer JWT), mode **Try it out** aktif otomatis, contoh payload dummy siap klik, serta seeder akun dummy (`bun run db:seed`).
 - **Standar Keamanan**:
   - Hashing password menggunakan **`bcrypt`** (`cost: 10`) melalui API native `Bun.password`, disertai batas maksimal 72 byte untuk mencegah pemotongan karakter diam-diam (*silent truncation*).
   - Mitigasi *timing-based user enumeration* saat login pada email yang tidak terdaftar.
@@ -99,7 +101,8 @@ learn-vibe-coding/
 │   ├── infrastructure/
 │   │   ├── database/
 │   │   │   ├── index.ts                          # Factory pool mysql2 & instance Drizzle ORM
-│   │   │   └── schema.ts                         # Definisi skema tabel MySQL (users)
+│   │   │   ├── schema.ts                         # Definisi skema tabel MySQL (users)
+│   │   │   └── seed.ts                           # Seeder akun dummy idempoten untuk uji Swagger
 │   │   ├── repositories/
 │   │   │   └── drizzle-user-repository.ts        # Implementasi IUserRepository berbasis Drizzle
 │   │   └── security/
@@ -111,6 +114,7 @@ learn-vibe-coding/
 │   └── delivery/
 │       └── http/
 │           ├── response.ts                       # Helper response envelope (success, paginated, error)
+│           ├── swagger.ts                        # Konfigurasi Swagger UI & OpenAPI 3.0.3
 │           ├── middlewares/
 │           │   ├── auth-middleware.ts            # Validasi header Authorization: Bearer <token>
 │           │   ├── error-handler.ts              # Mapping error terpusat ke status HTTP & JSON
@@ -120,7 +124,8 @@ learn-vibe-coding/
 │               └── user-routes.ts                # Endpoint /api/v1/users/*
 ├── tests/
 │   ├── auth.unit.test.ts                         # Unit test HTTP & UseCase (in-memory repository)
-│   └── auth.integration.test.ts                  # Integration test end-to-end ke MySQL lokal
+│   ├── auth.integration.test.ts                  # Integration test end-to-end ke MySQL lokal
+│   └── swagger.test.ts                           # Pengujian endpoint Swagger UI & spec OpenAPI JSON
 ├── .env.example                                  # Template konfigurasi environment variables
 ├── .gitignore                                    # Daftar file yang dikecualikan dari Git (termasuk .env)
 ├── bun.lock                                      # Lockfile dependensi Bun
@@ -203,16 +208,19 @@ Agar struktur codebase tetap konsisten saat project berkembang, seluruh file dan
    | `JWT_EXPIRES_IN` | Tidak | `1d` | Masa berlaku access token (default: `1d`) |
    | `JWT_ISSUER` | Tidak | `learn-vibe-coding` | Nilai claim `iss` pada JWT |
 
-5. **Jalankan migrasi database:**
+5. **Jalankan migrasi database dan isi data dummy (opsional untuk uji cepat Swagger):**
    ```bash
    bun run db:migrate
+   bun run db:seed
    ```
 
 6. **Jalankan server development:**
    ```bash
    bun run dev
    ```
-   Server akan aktif di `http://localhost:3000`.
+   - Server API aktif di `http://localhost:3000`
+   - Swagger UI interaktif aktif di `http://localhost:3000/swagger`
+   - Spesifikasi OpenAPI JSON tersedia di `http://localhost:3000/swagger/json`
 
 7. **Jalankan pengecekan tipe dan automated test:**
    ```bash
@@ -232,6 +240,7 @@ Agar struktur codebase tetap konsisten saat project berkembang, seluruh file dan
 | `bun run db:generate` | Membuat file migrasi SQL baru dari perubahan `schema.ts` |
 | `bun run db:migrate` | Menerapkan migrasi SQL ke database MySQL |
 | `bun run db:push` | Menyinkronkan skema langsung ke database tanpa file migrasi |
+| `bun run db:seed` | Mengisi akun dummy awal (`bintang@example.com` & `demo.user@example.com`) secara idempoten |
 | `bun run db:studio` | Membuka Drizzle Studio untuk inspeksi database |
 
 ---
